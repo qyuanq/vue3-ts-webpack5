@@ -4,7 +4,7 @@ import type { AxiosInstance } from 'axios'
 // 自定义接口
 import type { HYRequestInterceptors, HYRequestConfig } from './type'
 
-import { Toast } from 'vant'
+import { Toast, Dialog } from 'vant'
 
 // 创建不同的axios实例
 class HYRequest {
@@ -53,27 +53,38 @@ class HYRequest {
       },
       (err) => {
         // @todo移除loading
+        let message = ''
         //1. 响应失败返回错误码
         switch (err.response.status) {
-          case 403:
-            Toast.fail('拒绝访问')
-            break
-          case 404:
-            Toast.fail('很抱歉资源未找到')
+          case 400:
+            message = '参数不正确'
             break
           case 401:
-            Toast.fail('未授权，请重新登录')
+            message = '您未登录，或者登录已经超时，请先登录！'
+            break
+          case 403:
+            message = '拒绝访问'
+            break
+          case 404:
+            message = '很抱歉资源未找到'
             break
           case 500:
-            Toast.fail('服务器错误')
+            message = '服务器错误'
+            break
+          case 502:
+            message = '网关错误'
+            break
+          case 503:
+            message = '服务不可用'
             break
           case 504:
-            Toast.fail('网络超时')
+            message = '网络超时，请稍后再试！'
             break
           default:
-            Toast.fail(`系统提示${err.response.message}`)
+            message = `系统提示${err.response.message}` //异常问题，请联系管理员！
             break
         }
+        Toast.fail(message)
         // return err
         return Promise.reject(err)
       }
@@ -109,6 +120,22 @@ class HYRequest {
           reject(err)
         })
     })
+  }
+
+  get<T = any>(config: HYRequestConfig<T>): Promise<T> {
+    return this.request<T>({ ...config, method: 'GET' })
+  }
+
+  post<T = any>(config: HYRequestConfig<T>): Promise<T> {
+    return this.request<T>({ ...config, method: 'POST' })
+  }
+
+  delete<T = any>(config: HYRequestConfig<T>): Promise<T> {
+    return this.request<T>({ ...config, method: 'DELETE' })
+  }
+
+  put<T = any>(config: HYRequestConfig<T>): Promise<T> {
+    return this.request<T>({ ...config, method: 'PUT' })
   }
 }
 export default HYRequest
