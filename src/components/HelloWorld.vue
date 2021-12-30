@@ -1,5 +1,6 @@
 <template>
   <div class="hello">
+    <SvgIcon icon-class="red"></SvgIcon>
     <van-button type="primary">主要按钮</van-button>
     <van-button type="info">信息按钮</van-button>
     <van-button type="default">默认按钮</van-button>
@@ -100,9 +101,13 @@
 <script lang="ts">
 import { defineComponent } from 'vue'
 import { getAction, postAction } from '@/api'
+// import SvgIcon from '@c/SvgIcon/index.vue'
 
 export default defineComponent({
   name: 'HelloWorld',
+  components: {
+    // SvgIcon
+  },
   props: {
     msg: String
   },

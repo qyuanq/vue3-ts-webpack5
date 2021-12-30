@@ -1,9 +1,9 @@
 import hyRequest from '@/utils/request'
 import qs from 'qs'
 
-interface DataType {
-  result: any
-  code: string
+interface DataType<T = any> {
+  result: T
+  code: string | number
   success: boolean
 }
 
