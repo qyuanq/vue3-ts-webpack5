@@ -1,5 +1,6 @@
 <template>
   <div class="hello">
+    {{ $t('login.title') }}
     <SvgIcon icon-class="red"></SvgIcon>
     <van-button type="primary">主要按钮</van-button>
     <van-button type="info">信息按钮</van-button>
