@@ -57,7 +57,7 @@ export function downFilePost(url: string, parameter: any): Promise<DataType> {
   })
 }
 
-// 文件上传
+// 文件上传 param类型FormData
 export function uploadAction(url: string, parameter: any): Promise<DataType> {
   return hyRequest.post<DataType>({
     url: url,
