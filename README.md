@@ -1,5 +1,5 @@
 # sanlie-h5
-基于vue3+ts+webpack5+vant3搭建的移动端H5应用
+基于vue3+ts+webpack4+vant3搭建的移动端H5应用
 
 ## 功能
 
