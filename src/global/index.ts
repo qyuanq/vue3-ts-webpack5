@@ -1,6 +1,6 @@
 import { App } from 'vue'
 import { Loading, Toast, Button } from 'vant'
-import SvgIcon from '@c/SvgIcon/index.vue' //全局svg组件
+import SvgIcon from '@/components/SvgIcon/index.vue' //全局svg组件
 
 const components = [Loading, Toast, Button, SvgIcon]
 

@@ -1,5 +1,6 @@
-# sanlie-h5
-基于vue3+ts+webpack4+vant3搭建的移动端H5应用
+# vue-ts-webpack5
+
+基于 vue3+ts+webpack5+vant3 搭建的移动端 H5 应用
 
 ## 功能
 
@@ -8,6 +9,7 @@
   - 国际化多语言
   - Svg Sprite 图标
 ```
+
 ## 目录
 
 ```
@@ -72,7 +74,7 @@
         |-- style                - 样式文件
         |   |-- index.less
         |   |-- variables.less
-        |-- utils                
+        |-- utils
         |   |-- index.ts         - 公共方法
         |   |-- cache            - 缓存
         |   |   |-- index.ts
@@ -87,7 +89,6 @@
             |-- Home.vue
 
 ```
-
 
 ## 项目下载和运行
 
@@ -125,6 +126,7 @@ npm run lint
 ```
   npm run prettier
 ```
+
 ## 规范
 
-git遵循husky,提交信息使用Commitizen，利用`npm run commit`代替`git commit`
+git 遵循 husky,提交信息使用 Commitizen，利用`npm run commit`代替`git commit`

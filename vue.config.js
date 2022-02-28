@@ -1,7 +1,7 @@
 const path = require('path')
 const { BundleAnalyzerPlugin } = require('webpack-bundle-analyzer')
 const TerserPlugin = require('terser-webpack-plugin')
-const OptimizeCSSAssetsPlugin = require('optimize-css-assets-webpack-plugin')
+const CssMinimizerPlugin = require('css-minimizer-webpack-plugin')
 
 const IS_PRO = process.env.NODE_ENV === 'production'
 
@@ -9,9 +9,11 @@ function resolve(dir) {
   return path.join(__dirname, dir)
 }
 
-module.exports = {
+const { defineConfig } = require('@vue/cli-service')
+module.exports = defineConfig({
+  transpileDependencies: true,
   // 部署应用包时的基本URL
-  publicPath: './',
+  publicPath: '/',
 
   // 打包输出目录
   outputDir: 'dist',
@@ -28,84 +30,97 @@ module.exports = {
   runtimeCompiler: true,
 
   devServer: {
-    port: 9001, // 端口号
-    open: true, // 自动打开浏览器
-    overlay: {
-      // 浏览器同时显示错误和警告
-      warnings: false,
-      errors: true
-    },
-    proxy: {
-      // 代理
-      '/api/': {
-        target: 'http://localhost:7300/mock/60f9196edbd67e1250897d71/', // 目标代理接口地址
-        secure: false,
-        // changeOrigin: true,
-        pathRewrite: {
-          // 接口前缀过滤
-          '^/api/': ''
-        }
-      }
-    }
+    port: 9001 // 端口号
+    // overlay: {
+    //   // 浏览器同时显示错误和警告
+    //   warnings: false,
+    //   errors: true
+    // },
+    // proxy: {
+    //   // 代理
+    //   '/api': {
+    //     target: 'http://localhost:7300/mock/60f9196edbd67e1250897d71/', // 目标代理接口地址
+    //     // secure: false,
+    //     // changeOrigin: true,
+    //     pathRewrite: {
+    //       // 接口前缀过滤
+    //       '^/api': ''
+    //     }
+    //   }
+    // }
   },
   // 全局引入less
-  // pluginOptions: {
-  //   'style-resources-loader': {
-  //     preProcessor: 'less',
-  //     patterns: [path.resolve(__dirname, 'src/styles/index.less')] // 引入全局样式变量
-  //   }
-  // },
+  pluginOptions: {
+    'style-resources-loader': {
+      preProcessor: 'less',
+      patterns: [path.resolve(__dirname, 'src/style/index.less')] // 引入全局样式变量
+    }
+  },
 
   configureWebpack: (config) => {
-    config.resolve.extensions = ['.js', '.vue', '.ts']
+    config.resolve.extensions = ['.ts', '.vue', '.tsx', '.js', '.jsx', '.json']
     const plugins = []
     if (IS_PRO) {
       // 为生产环境修改配置...
-
+      // 可视化结构
+      // plugins.push(new BundleAnalyzerPlugin({
+      //   analyzerPort: 9090
+      // }))
       config.optimization = {
-        // 压缩js,需要nodev10以上，webpack4对应TerserPlugin下载v4版本
+        minimize: true,
         minimizer: [
+          // 压缩js webpack5内置TerserPlugin
           new TerserPlugin({
-            cache: true,
-            parallel: true, // 多线程
-            terserOptions: {
-              comments: false,
-              compress: {
-                // 删除⽆⽤的代码
-                unused: true,
-                // 删掉 debugger
-                drop_debugger: true, // eslint-disable-line
-                // 移除 console
-                drop_console: true, // eslint-disable-line
-                // 移除⽆⽤的代码
-                dead_code: true // eslint-disable-line
-              }
-            }
-          })
+            parallel: true, // 默认启用多线程
+            extractComments: false
+          }),
+          //压缩 css
+          new CssMinimizerPlugin()
         ],
         // 代码分割
         runtimeChunk: true, // 减少 entry chunk 体积
         splitChunks: {
           cacheGroups: {
-            common: {
-              minChunks: 2,
-              // name: 'common',
-              priority: 5,
-              reuseExistingChunk: true, // 重用已存在代码块
-              test: resolve('src')
+            // 配置提取模块的方案
+            default: false,
+            styles: {
+              name: 'styles',
+              test: /\.(s?css|less|sass)$/,
+              chunks: 'all',
+              enforce: true,
+              priority: 10
             },
-            vendor: {
-              chunks: 'initial', // 代码分割类型
-              name: 'vendor', // 代码块名称
-              priority: 10, // 优先级
-              test: /node_modules/ // 校验文件正则表达式
+            common: {
+              name: 'chunk-common',
+              chunks: 'all',
+              minChunks: 2,
+              maxInitialRequests: 5,
+              minSize: 0,
+              priority: 1,
+              enforce: true,
+              reuseExistingChunk: true
+            },
+            vendors: {
+              name: 'chunk-vendors',
+              test: /[\\/]node_modules[\\/]/,
+              chunks: 'all',
+              priority: 2,
+              enforce: true,
+              reuseExistingChunk: true
             }
-          }, // 缓存组
-          chunks: 'all' // 代码分割类型：all全部模块，async异步模块，initial入口模块
-        } // 代码块分割
+          }
+        }
       }
     } else {
       // 为开发环境修改配置...
+      config.cache = {
+        type: 'filesystem', // 启用持久化缓存
+        cacheDirectory: resolve('.temp_cache'), // 缓存文件存放的位置
+        buildDependencies: {
+          // 缓存失效的配置
+          config: [__filename]
+        }
+      }
     }
     config.plugins = [...config.plugins, ...plugins]
   },
@@ -115,19 +130,19 @@ module.exports = {
     config.resolve.alias
       .set('@', resolve('src'))
       .set('@c', resolve('src/components'))
-      .set('@css', resolve('src/styles'))
+      .set('@css', resolve('src/style'))
       .set('@utils', resolve('src/utils'))
       .set('@img', resolve('src/assets/images'))
 
     // 缩减范围,开启babel-loader缓存
-    config.module
-      .rule('js')
-      .exclude.add(resolve('node_modules'))
-      .end()
-      .use('babel-loader')
-      .options({
-        cacheDirectory: true
-      })
+    // config.module
+    //   .rule('js')
+    //   .exclude.add(resolve('node_modules'))
+    //   .end()
+    //   .use('babel-loader')
+    //   .options({
+    //     cacheDirectory: true
+    //   })
 
     config.module.rule('less').include.add(resolve('src'))
     config.module.rule('vue').include.add(resolve('src'))
@@ -161,13 +176,6 @@ module.exports = {
       //     gifsicle: { interlaced: false }
       //   })
 
-      // 可视化结构
-      config.plugin('webpack-report').use(BundleAnalyzerPlugin, [
-        // {
-        //   analyzerMode: 'static'
-        // }
-      ])
-
       // 压缩html
       config.plugin('html').tap((args) => {
         args[0].minify = {
@@ -178,17 +186,6 @@ module.exports = {
         }
         return args
       })
-
-      // 压缩css  默认cssnano引擎
-      config.plugin('css').use(OptimizeCSSAssetsPlugin, [
-        {
-          cssProcessorOptions: {
-            discardComments: {
-              removeAll: true
-            }
-          }
-        }
-      ])
     }
   }
-}
+})
