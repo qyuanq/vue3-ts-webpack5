@@ -1,4 +1,4 @@
-# vue-ts-webpack5
+# vue3-ts-webpack5
 
 基于 vue3+ts+webpack5+vant3 搭建的移动端 H5 应用
 
