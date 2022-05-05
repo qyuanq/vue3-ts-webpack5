@@ -2,7 +2,7 @@ import { createApp } from 'vue'
 import App from './App.vue'
 import router from './router'
 import store from './store'
-import fastClick from 'fastclick'
+const fastClick = require('fastclick')
 fastClick.attach(document.body)
 import '@/icons' //导入svg图标
 import globalComponent from '@/global'

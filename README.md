@@ -103,6 +103,15 @@ cd vue-ts-webpack5
 npm install
 ```
 
+### 安装husky
+
+windows执行
+`npx husky-init ; npm install`
+
+mac执行
+`npx husky-init && npm install`
+
+
 ### 开发模式运行
 
 ```
@@ -130,17 +139,3 @@ npm run lint
 ## 规范
 
 git 遵循 husky,提交信息使用 Commitizen，利用`npm run commit`代替`git commit`
-
-## 错误处理
-
-遇到 Property 'attach' does not exist on type 'typeof fastclick'. 报错
-修改 node_modules\@types\fastclick\index.d.ts
-```
-declare module "fastclick" {
-    // function fastclick(layer: any, options?: FastClickOptions): FastClickObject;
-    // namespace fastclick {
-    //     var FastClick: FastClickStatic;
-    // }
-    var FastClick: FastClickStatic;
-    export = fastclick;
-}
